@@ -171,7 +171,7 @@ def stepsize(function, gradient, x_k, x_k1, s_k, alpha_k, alpha_k1):
     return np.min([alpha_k/alpha_k1 * s_k, alpha_k**2/(alpha_k1 + alpha_k**2) * 1/L_k1])
 
 
-# In[2]:
+# In[3]:
 
 
 def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
