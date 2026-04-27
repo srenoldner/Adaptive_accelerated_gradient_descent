@@ -171,7 +171,7 @@ def stepsize(function, gradient, x_k, x_k1, s_k, alpha_k, alpha_k1):
     return np.min([alpha_k/alpha_k1 * s_k, alpha_k**2/(alpha_k1 + alpha_k**2) * 1/L_k1])
 
 
-# In[3]:
+# In[2]:
 
 
 def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
@@ -185,7 +185,7 @@ def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
         s_0 [float]: starting stepsize
         iterations [int]: maximum number of iterations
         tau [function]: definition of sequence tau_k dependent on natural number k
-        alpha [function]: definition of sequence alpha_k dependent on tau_curr and tau_next
+        alpha [function]: definition of sequence alpha_k dependent on natural number k
         B_0 [float]: starting value for sequence B_k
     --------------
     RETURNS
@@ -205,8 +205,8 @@ def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
     tau_curr = tau(0)
     tau_next = tau(1)
     tau_next2 = tau(2)
-    alpha_curr = alpha(tau_curr, tau_next)
-    alpha_next = alpha(tau_next, tau_next2)
+    alpha_curr = alpha(0)
+    alpha_next = alpha(1)
     
     A_prev = 0
     A_curr = alpha_next * tau_next * (tau_next - 1)
@@ -222,6 +222,8 @@ def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
         gradient_next = gradient(x_next)
         
         denominator = (function_next - function_curr) + np.dot(gradient_next, x_curr - x_next)
+        #mathematically denominator < 0, however at small scales rounding errors can cause it to become positive
+        #Then fallback on negative denominator from iteration before
         if denominator <= 0:
             L_next = -1/2 * la.norm(gradient_next - gradient_curr)**2/denominator
             
@@ -235,8 +237,8 @@ def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
         tau_curr = tau_next
         tau_next = tau_next2
         tau_next2 = tau(k + 3)
-        alpha_curr = alpha(tau_curr, tau_next)
-        alpha_next = alpha(tau_next, tau_next2)
+        alpha_curr = alpha_next
+        alpha_next = alpha(k + 2)
         
         A_prev = A_curr
         A_curr = alpha_next * tau_next * (tau_next - 1)
