@@ -38,6 +38,8 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
     y_curr = y_0
     x_curr = x_0
     step_curr = s_0
+    #first guess for Lipschitz constant (only used in case of numerical errors)
+    L_curr = 1/s_0
     function_curr = function(x_curr)
     gradient_curr = gradient(x_curr)
     
@@ -57,11 +59,12 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
         gradient_next = gradient(x_next)
         function_next = function(x_next)
         
-        step_curr = stepsize(function_curr, function_next, gradient_curr, gradient_next, x_curr, x_next, step_curr, t_next, m, beta, gamma, omega, delta)
+        step_curr, L_next = stepsize(function_curr, function_next, gradient_curr, gradient_next, x_curr, x_next, step_curr, t_next, m, beta, gamma, omega, delta, L_curr)
         
         t_curr = t_next
         y_curr = y_next
         x_curr = x_next
+        L_curr = L_next
         
         iterates.append(x_next)
         function_values.append(function_next)
@@ -76,7 +79,7 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
 # In[7]:
 
 
-def stepsize(function_curr, function_next, gradient_curr, gradient_next, x_curr, x_next, step_curr, t_next, m, beta, gamma, omega, delta):
+def stepsize(function_curr, function_next, gradient_curr, gradient_next, x_curr, x_next, step_curr, t_next, m, beta, gamma, omega, delta, L_curr):
     """
     args:
         function_curr [float]: function value at iteration k
@@ -91,18 +94,24 @@ def stepsize(function_curr, function_next, gradient_curr, gradient_next, x_curr,
         omega [float]: stepsize parameter, 0 <= omega < 1
         delta [float]: stepsize parameter, 0 <= delta < 1
         beta [float]: stepsize parameter, beta > 0
+        L_curr [float]: approximation of Lipschitz constant at iteration k
     return
         step_next [float]: stepsize at iteration k+1
+        L_next [float]: approximation of Lipschitz constant at iteration k+1
     """
     A = (t_next - m)/(t_next - 1)
     B = 2/((1 + beta) * gamma) * (1 - 1/t_next)
     C = (1 - omega)/(2/B + 1/(beta * (1 - delta) * gamma * A))
     
-    L_next = 1/2 * np.linalg.norm(gradient_next - gradient_curr)**2 / (np.inner(gradient_next, x_next - x_curr) - (function_next - function_curr))
-    
+    denominator = np.inner(gradient_next, x_next - x_curr) - (function_next - function_curr)
+    if denominator > 0:
+        L_next = 1/2 * np.linalg.norm(gradient_next - gradient_curr)**2 / denominator
+    #fallback in case numerical errors result in denominator <= 0
+    else:
+        L_next = L_curr
     step_next = np.min([A*step_curr, B*step_curr, C/L_next])
     
-    return step_next
+    return step_next, L_next
 
 
 # In[ ]:
