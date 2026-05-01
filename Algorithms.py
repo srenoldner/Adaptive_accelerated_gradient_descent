@@ -1,17 +1,14 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[7]:
+# In[8]:
 
 
 import numpy as np
 import numpy.linalg as la
-from Testing_functions import logistic_gradient, logistic_regression
-from AdaAGM import AdaAGM
-import matplotlib.pyplot as plt
 
 
-# In[1]:
+# In[9]:
 
 
 def constant_gradient(function, gradient, x_0, s, iterations):
@@ -27,9 +24,9 @@ def constant_gradient(function, gradient, x_0, s, iterations):
     --------------
     RETURNS
         iterates [list]: sequence of iterates produced by gradient method
+        gradient_norms [list]: sequence of norms of the gradient at every iteration
     """
     iterates = []
-    function_values = []
     gradient_norms = []
     
     x_curr = x_0
@@ -39,19 +36,17 @@ def constant_gradient(function, gradient, x_0, s, iterations):
         x_next = x_curr - s * gradient_curr
         
         iterates.append(x_curr)
-        function_values.append(function(x_curr))
         gradient_norms.append(la.norm(gradient_curr))
         
         x_curr = x_next
         
     iterates.append(x_next)
-    function_values.append(function(x_next))
     gradient_norms.append(la.norm(gradient(x_next)))
     
-    return iterates, function_values, gradient_norms
+    return iterates, gradient_norms
 
 
-# In[9]:
+# In[10]:
 
 
 def Nesterov_gradient(function, gradient, x_0, s, iterations):
@@ -67,6 +62,7 @@ def Nesterov_gradient(function, gradient, x_0, s, iterations):
     --------------
     RETURNS
         iterates [list]: sequence of iterates produced by Nesterov gradient method
+        gradient_norms [list]: sequence of norms of the gradient at every iteration
     """
     iterates = []
     function_values = []
@@ -83,7 +79,6 @@ def Nesterov_gradient(function, gradient, x_0, s, iterations):
         x_next = y_next + (theta_curr - 1)/theta_next * (y_next - y_curr)
         
         iterates.append(x_curr)
-        function_values.append(function(x_curr))
         gradient_norms.append(la.norm(gradient_curr))
         
         theta_curr = theta_next
@@ -91,15 +86,14 @@ def Nesterov_gradient(function, gradient, x_0, s, iterations):
         x_curr = x_next
         
     iterates.append(x_next)
-    function_values.append(function(x_next))
     gradient_norms.append(la.norm(gradient(x_next)))
     
-    return iterates, function_values, gradient_norms
+    return iterates, gradient_norms
 
 
 # Eher nicht verwenden, da schlechter als AdaNAG_G und in anderem Paper gar nicht getestet
 
-# In[10]:
+# In[11]:
 
 
 def AdaNAG(function, gradient, x_0, s_0, iterations):
@@ -159,7 +153,7 @@ def AdaNAG(function, gradient, x_0, s_0, iterations):
     return iterates
 
 
-# In[11]:
+# In[12]:
 
 
 def stepsize(function, gradient, x_k, x_k1, s_k, alpha_k, alpha_k1):
@@ -171,7 +165,7 @@ def stepsize(function, gradient, x_k, x_k1, s_k, alpha_k, alpha_k1):
     return np.min([alpha_k/alpha_k1 * s_k, alpha_k**2/(alpha_k1 + alpha_k**2) * 1/L_k1])
 
 
-# In[3]:
+# In[13]:
 
 
 def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
@@ -190,6 +184,8 @@ def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
     --------------
     RETURNS
         iterates [list]: sequence of iterates produced by AdaNAG_G
+        gradient_norms [list]: sequence of norms of the gradient at every iteration
+        function_values [list]: sequence of function values at every iteration
     """
     x_curr = x_0
     z_curr = x_0
@@ -249,7 +245,7 @@ def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
         function_values.append(function_next)
         gradient_norms.append(la.norm(gradient_next))
         
-    return iterates, function_values, gradient_norms
+    return iterates, gradient_norms, function_values
 
 
 # In[ ]:
