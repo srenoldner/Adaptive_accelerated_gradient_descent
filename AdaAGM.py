@@ -10,12 +10,12 @@ import numpy as np
 import numpy.linalg as la
 
 
-# In[6]:
+# In[1]:
 
 
 def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta, iterations):
     """
-    Implementation of generalized adaptive Nesterov accelerated gradient method
+    Implementation of adaptive accelerated gradient method: see Zepeng Wang, Juan Peypouguet: "Adaptive accelerated gradient method for smooth convex optimization" 
     --------------
     ARGUMENTS
         function [function]: real-valued function dependent on one variable
@@ -32,7 +32,9 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
         iterations [int]: maximum number of iterations
     --------------
     RETURNS
-        iterates [list]: sequence of iterates produced by AdaNAG_G
+        iterates [list]: sequence of iterates produced by AdaAGM
+        gradient_norms [list]: sequence of norms of the gradient at every iteration
+        function_values [list]: sequence of function values at every iteration
     """
     t_curr = t_0
     y_curr = y_0
@@ -73,10 +75,10 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
         function_curr = function_next
         gradient_curr = gradient_next
         
-    return iterates, function_values, gradient_norms
+    return iterates, gradient_norms, function_values
 
 
-# In[7]:
+# In[2]:
 
 
 def stepsize(function_curr, function_next, gradient_curr, gradient_next, x_curr, x_next, step_curr, t_next, m, beta, gamma, omega, delta, L_curr):
