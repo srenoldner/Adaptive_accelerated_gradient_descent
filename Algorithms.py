@@ -11,7 +11,7 @@ from AdaAGM import AdaAGM
 import matplotlib.pyplot as plt
 
 
-# In[8]:
+# In[1]:
 
 
 def constant_gradient(function, gradient, x_0, s, iterations):
@@ -34,7 +34,7 @@ def constant_gradient(function, gradient, x_0, s, iterations):
     
     x_curr = x_0
     
-    for n in range(1, iterations):
+    for n in range(1, iterations + 1):
         gradient_curr = gradient(x_curr)
         x_next = x_curr - s * gradient_curr
         
