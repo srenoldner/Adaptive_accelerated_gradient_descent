@@ -11,7 +11,7 @@ import numpy.linalg as la
 import time
 
 
-# In[8]:
+# In[12]:
 
 
 def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta, iterations):
@@ -36,10 +36,10 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
         x_curr [np.array]: approximated solution of minimizing problem, last iterate
         function_values [list]: sequence of function values at every iteration
         gradient_norms [list]: sequence of gradient norms at every iteration
-        times [list]: sequence of periods of time elapsed at each iteration
+        times [list]: elapsed time from start of calculation at every iteration
         steps [list]: sequence of stepsizes at every iteration
     """
-    time_curr = time.perf_counter()
+    time_0 = time.perf_counter()
     
     t_curr = t_0
     y_curr = y_0
@@ -52,11 +52,9 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
     
     steps = [s_0]
     function_values = [function_curr]
-    gradient_norms = [gradient_curr]
-    time_next = time.perf_counter()
-    times = [time_next - time_curr]
-    
-    time_curr = time_next
+    gradient_norms = [la.norm(gradient_curr)]
+
+    times = [time.perf_counter() - time_0]
     
     for n in range(iterations):
         t_next = (m + np.sqrt(m**2 + 4*t_curr**2))/2
@@ -80,13 +78,11 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
         function_curr = function_next
         gradient_curr = gradient_next
         
-        gradient_norms.append(gradient_next)
+        gradient_norms.append(la.norm(gradient_next))
         function_values.append(function_next)
         steps.append(step_curr)
         
-        time_next = time.perf_counter()
-        times.append(time_next - time_curr)
-        time_curr = time_next
+        times.append(time.perf_counter() - time_0)
         
     return x_curr, function_values, gradient_norms, times, steps
 
