@@ -3,14 +3,15 @@
 
 # # Adaptive Accelerated gradient method for smooth convex optimiziation
 
-# In[5]:
+# In[1]:
 
 
 import numpy as np
 import numpy.linalg as la
+import time
 
 
-# In[1]:
+# In[4]:
 
 
 def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta, iterations):
@@ -32,10 +33,13 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
         iterations [int]: maximum number of iterations
     --------------
     RETURNS
-        iterates [list]: sequence of iterates produced by AdaAGM
-        gradient_norms [list]: sequence of norms of the gradient at every iteration
+        x_curr [np.array]: approximated solution of minimizing problem, last iterate
+        steps [list]: sequence of stepsizes at every iteration
         function_values [list]: sequence of function values at every iteration
+        times [list]: sequence of periods of time elapsed at each iteration
     """
+    time_curr = time.perf_counter()
+    
     t_curr = t_0
     y_curr = y_0
     x_curr = x_0
@@ -45,9 +49,12 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
     function_curr = function(x_curr)
     gradient_curr = gradient(x_curr)
     
-    iterates = [x_curr]
+    steps = [s_0]
     function_values = [function_curr]
-    gradient_norms = [la.norm(gradient_curr)]
+    time_next = time.perf_counter()
+    times = [time_next - time_curr]
+    
+    time_curr = time_next
     
     for n in range(iterations):
         t_next = (m + np.sqrt(m**2 + 4*t_curr**2))/2
@@ -68,17 +75,20 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
         x_curr = x_next
         L_curr = L_next
         
-        iterates.append(x_next)
+        time_next = time.perf_counter()
+        
+        steps.append(step_curr)
         function_values.append(function_next)
-        gradient_norms.append(la.norm(gradient_next))
+        times.append(time_next - time_curr)
         
         function_curr = function_next
         gradient_curr = gradient_next
+        time_curr = time_next
         
-    return iterates, gradient_norms, function_values
+    return x_curr, steps, function_values, times
 
 
-# In[2]:
+# In[5]:
 
 
 def stepsize(function_curr, function_next, gradient_curr, gradient_next, x_curr, x_next, step_curr, t_next, m, beta, gamma, omega, delta, L_curr):
