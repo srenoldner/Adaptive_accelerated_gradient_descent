@@ -11,7 +11,7 @@ import numpy.linalg as la
 import time
 
 
-# In[4]:
+# In[8]:
 
 
 def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta, iterations):
@@ -34,9 +34,10 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
     --------------
     RETURNS
         x_curr [np.array]: approximated solution of minimizing problem, last iterate
-        steps [list]: sequence of stepsizes at every iteration
         function_values [list]: sequence of function values at every iteration
+        gradient_norms [list]: sequence of gradient norms at every iteration
         times [list]: sequence of periods of time elapsed at each iteration
+        steps [list]: sequence of stepsizes at every iteration
     """
     time_curr = time.perf_counter()
     
@@ -51,6 +52,7 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
     
     steps = [s_0]
     function_values = [function_curr]
+    gradient_norms = [gradient_curr]
     time_next = time.perf_counter()
     times = [time_next - time_curr]
     
@@ -75,20 +77,21 @@ def AdaAGM(function, gradient, x_0, y_0, gamma, t_0, m, s_0, omega, delta, beta,
         x_curr = x_next
         L_curr = L_next
         
-        time_next = time.perf_counter()
-        
-        steps.append(step_curr)
-        function_values.append(function_next)
-        times.append(time_next - time_curr)
-        
         function_curr = function_next
         gradient_curr = gradient_next
+        
+        gradient_norms.append(gradient_next)
+        function_values.append(function_next)
+        steps.append(step_curr)
+        
+        time_next = time.perf_counter()
+        times.append(time_next - time_curr)
         time_curr = time_next
         
-    return x_curr, steps, function_values, times
+    return x_curr, function_values, gradient_norms, times, steps
 
 
-# In[5]:
+# In[9]:
 
 
 def stepsize(function_curr, function_next, gradient_curr, gradient_next, x_curr, x_next, step_curr, t_next, m, beta, gamma, omega, delta, L_curr):

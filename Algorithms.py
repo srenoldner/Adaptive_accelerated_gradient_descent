@@ -8,7 +8,7 @@ import numpy as np
 import numpy.linalg as la
 
 
-# In[9]:
+# In[10]:
 
 
 def constant_gradient(function, gradient, x_0, s, iterations):
@@ -23,30 +23,33 @@ def constant_gradient(function, gradient, x_0, s, iterations):
         iterations [int]: maximum number of iterations
     --------------
     RETURNS
-        iterates [list]: sequence of iterates produced by gradient method
-        gradient_norms [list]: sequence of norms of the gradient at every iteration
+        x_curr [np.array]: approximated solution of minimizing problem, last iterate
+        function_values [list]: sequence of function values at every iteration
+        gradient_norms [list]: sequence of gradient norms at every iteration
+        times [list]: sequence of periods of time elapsed at each iteration without calculation of function_values
     """
-    iterates = []
-    gradient_norms = []
-    
+    function_values = [function(x_0)]
+    time_curr = time.perf_counter()
+    times = []
     x_curr = x_0
     
     for n in range(1, iterations + 1):
         gradient_curr = gradient(x_curr)
-        x_next = x_curr - s * gradient_curr
+        x_curr = x_curr - s * gradient_curr
         
-        iterates.append(x_curr)
-        gradient_norms.append(la.norm(gradient_curr))
+        gradient_norms.append(gradient_curr)
         
-        x_curr = x_next
+        time_next = time.perf_counter()
+        times.append(time_next - time_curr)
+        #don't time function evaluation
+        function_values.append(function(x_curr))
         
-    iterates.append(x_next)
-    gradient_norms.append(la.norm(gradient(x_next)))
-    
-    return iterates, gradient_norms
+        time_curr = time.perf_counter()
+        
+    return x_curr, function_values, gradient_norms, times
 
 
-# In[10]:
+# In[9]:
 
 
 def Nesterov_gradient(function, gradient, x_0, s, iterations):
@@ -61,16 +64,23 @@ def Nesterov_gradient(function, gradient, x_0, s, iterations):
         iterations [int]: maximum number of iterations
     --------------
     RETURNS
-        iterates [list]: sequence of iterates produced by Nesterov gradient method
-        gradient_norms [list]: sequence of norms of the gradient at every iteration
+        x_curr [np.array]: approximated solution of minimizing problem, last iterate
+        function_values [list]: sequence of function values at every iteration
+        gradient_norms [list]: sequence of gradient norms at every iteration
+        times [list]: sequence of periods of time elapsed at each iteration without calculation of function_values
     """
-    iterates = []
-    function_values = []
-    gradient_norms = []
+    function_values = [function(x_0)]
+    time_curr = time.perf_counter()
     
     theta_curr = 1
     y_curr = x_0
     x_curr = x_0
+    
+    gradient_norms = []
+    
+    time_next = time.perf_counter()
+    times = [time_next - time_curr]
+    time_curr = time_next
     
     for n in range(iterations):
         theta_next = (1 + np.sqrt(1 + 4*theta_curr))/2
@@ -78,17 +88,20 @@ def Nesterov_gradient(function, gradient, x_0, s, iterations):
         y_next = x_curr - s*gradient_curr
         x_next = y_next + (theta_curr - 1)/theta_next * (y_next - y_curr)
         
-        iterates.append(x_curr)
-        gradient_norms.append(la.norm(gradient_curr))
-        
         theta_curr = theta_next
         y_curr = y_next
         x_curr = x_next
         
-    iterates.append(x_next)
-    gradient_norms.append(la.norm(gradient(x_next)))
-    
-    return iterates, gradient_norms
+        gradient_norms.append(gradient_curr)
+        time_next = time.perf_counter()
+        times.append(time_next - time_curr)
+        
+        #don't time calculation of objective function
+        function_values.append(function(y_next))
+        
+        time_curr = time.perf_counter()
+        
+    return y_curr, function_values, gradient_norms, times
 
 
 # Eher nicht verwenden, da schlechter als AdaNAG_G und in anderem Paper gar nicht getestet
@@ -165,7 +178,7 @@ def stepsize(function, gradient, x_k, x_k1, s_k, alpha_k, alpha_k1):
     return np.min([alpha_k/alpha_k1 * s_k, alpha_k**2/(alpha_k1 + alpha_k**2) * 1/L_k1])
 
 
-# In[13]:
+# In[5]:
 
 
 def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
@@ -183,10 +196,13 @@ def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
         B_0 [float]: starting value for sequence B_k
     --------------
     RETURNS
-        iterates [list]: sequence of iterates produced by AdaNAG_G
-        gradient_norms [list]: sequence of norms of the gradient at every iteration
+        x_curr [np.array]: approximated solution of minimizing problem, last iterate
         function_values [list]: sequence of function values at every iteration
+        gradient_norms [list]: sequence of gradient norms at every iteration
+        times [list]: sequence of periods of time elapsed at each iteration
+        steps [list]: sequence of stepsizes at every iteration
     """
+    time_curr = time.perf_counter()
     x_curr = x_0
     z_curr = x_0
     s_curr = s_0
@@ -194,9 +210,9 @@ def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
     function_curr = function(x_curr)
     gradient_curr = gradient(x_curr)
     
-    iterates = [x_curr]
     function_values = [function_curr]
-    gradient_norms = [la.norm(gradient_curr)]
+    gradient_norms = [gradient_curr]
+    steps = [s_curr]
     
     tau_curr = tau(0)
     tau_next = tau(1)
@@ -208,6 +224,10 @@ def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
     A_curr = alpha_next * tau_next * (tau_next - 1)
     B_curr = B_0
     B_next = alpha_next**2 * tau_next**2 * ((tau_next -1)**2/(alpha_curr * tau_curr**2) - 1)
+    
+    time_next = time.perf_counter()
+    times = [time_next - time_curr]
+    time_curr = time_next
     
     for k in range(iterations):
         y_next = x_curr - s_curr*gradient_curr
@@ -241,11 +261,15 @@ def AdaNAG_G(function, gradient, x_0, s_0, iterations, tau, alpha, B_0):
         B_curr = B_next
         B_next = alpha_next**2 * tau_next**2 * ((tau_next -1)**2/(alpha_curr * tau_curr**2) - 1)
         
-        iterates.append(x_next)
         function_values.append(function_next)
-        gradient_norms.append(la.norm(gradient_next))
+        gradient_norms.append(gradient_next)
+        steps.append(s_curr)
         
-    return iterates, gradient_norms, function_values
+        time_next = time.perf_counter()
+        times.append(time_next - time_curr)
+        time_curr = time_next
+        
+    return x_curr, function_values, gradient_norms, times, steps
 
 
 # In[ ]:
