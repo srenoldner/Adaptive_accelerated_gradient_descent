@@ -56,7 +56,7 @@ def constant_gradient(function, gradient, x_0, s, iterations):
     return x_curr, function_values, gradient_norms, times
 
 
-# In[36]:
+# In[1]:
 
 
 def Nesterov_gradient(function, gradient, x_0, s, iterations):
@@ -90,7 +90,7 @@ def Nesterov_gradient(function, gradient, x_0, s, iterations):
     time_curr = time_next
     
     for n in range(iterations):
-        theta_next = (1 + np.sqrt(1 + 4*theta_curr))/2
+        theta_next = (1 + np.sqrt(1 + 4*theta_curr**2))/2
         y_next = x_curr - s*gradient_curr
         x_next = y_next + (theta_curr - 1)/theta_next * (y_next - y_curr)
         
