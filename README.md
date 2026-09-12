@@ -9,10 +9,16 @@ These methods are tested on the model problems logistic regression and least squ
 
 Figure 2:
 - Source of Data: Testing Least squares.ipynb
+- Result Data: Testing results/Logistic regression/
 - Used Algorithms: 
     - AdaAGM.py: all AdaAGM versions
     - Algorithms.py: Constant stepsize, Nesterov, AdaNAG-G_{12}, AdaNAG-G^{1/2}
 - Creation of Plots: Create Graphs.ipynb
+- Plot files:
+     - figures/Least squares/values_time_bodyfat.pdf
+     - figures/Least squares/values_time_cadata.pdf
+     - figures/Least squares/values_time_random small.pdf
+     - figures/Least squares/values_time_random large.pdf
 
 
 Figure 3:
@@ -21,6 +27,9 @@ Figure 3:
     - AdaAGM.py: all AdaAGM versions
     - Algorithms.py: Constant stepsize, Nesterov, AdaNAG-G_{12}, AdaNAG-G^{1/2}
 - Creation of Plots: Create Graphs.ipynb
+- Plot files:
+     - figures/Least squares/steps_different_m_values_random large.pdf
+     - figures/Least squares/steps_Cor5.5_vs_Cor5.6_cadata.pdf
 
 ## Logistic regression
 
@@ -30,3 +39,7 @@ Figure 4:
     - AdaAGM.py: all AdaAGM versions
     - Algorithms.py: Constant stepsize, Nesterov, AdaNAG-G_{12}, AdaNAG-G^{1/2}
 - Creation of Plots: Create Graphs.ipynb
+- Plot files:
+     - figures/Logistic regression/values_time_mushrooms.pdf
+     - figures/Least squares/values_time_w8a.pdf
+     - figures/Least squares/values_time_covtype.pdf
